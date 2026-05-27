@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LearnOS — Student Learning Dashboard
 
-## Getting Started
+A futuristic, animated student dashboard built as part of the 
+Frontend Intern Challenge.
 
-First, run the development server:
+**Live Demo:** https://learning-dashboard-chi.vercel.app  
+**GitHub:** https://github.com/Nihar0122/learning-dashboard
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Tech Stack
+
+- **Next.js 15** (App Router)
+- **Supabase** (PostgreSQL database)
+- **Tailwind CSS v4**
+- **Framer Motion**
+- **TypeScript**
+- **Lucide React**
+
+---
+
+## Architectural Choices
+
+I went with a clean separation between data and presentation. The Supabase 
+fetch happens entirely in a Server Component (CoursesSection.tsx), which 
+means the database query runs on the server before anything reaches the 
+browser. This keeps API keys secure and makes the initial load faster since 
+the HTML already has real data in it.
+
+For the UI layer, I kept things modular — BentoGrid handles the layout and 
+staggered animations, each CourseCard is self-contained, and the ProgressBar 
+is its own animated component.
+
+---
+
+## Server / Client Component Split
+
+The rule I followed was simple: if it touches the database or has no 
+interactivity, it's a Server Component. If it needs animations, state, or 
+event handlers, it's a Client Component.
+
+| Component | Type | Reason |
+|---|---|---|
+| CoursesSection.tsx | Server | Fetches from Supabase |
+| page.tsx | Server | Layout only, no interactivity |
+| Sidebar.tsx | Client | useState for active item + collapse |
+| BentoGrid.tsx | Client | Framer Motion animations |
+| ProgressBar.tsx | Client | Animates on mount |
+| BottomNav.tsx | Client | useState for active tab |
+
+Suspense boundaries wrap the async Server Component so skeleton loaders 
+appear instantly while Supabase responds — no layout shift, no blank screen.
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Running Locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+git clone https://github.com/Nihar0122/learning-dashboard.git
+cd learning-dashboard
+npm install
+cp .env.example .env.local
+# Add your Supabase keys to .env.local
+npm run dev
+```
 
-## Learn More
+Open http://localhost:3000 in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Challenges Faced
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The trickiest part was the Server/Client boundary with Framer Motion. Since 
+animations require browser APIs, every animated component needs 'use client' 
+— but I still wanted data fetching to stay on the server. The solution was 
+fetching in a Server Component and passing the data down as props to Client 
+Components, keeping the best of both worlds.
 
-## Deploy on Vercel
+Another challenge was TypeScript strictness with Framer Motion's Variants 
+type — the build would fail without explicitly typing the animation objects, 
+which wasn't obvious from the docs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Supabase's Row Level Security was also blocking reads by default, which took 
+some debugging to figure out since the error wasn't immediately clear.
