@@ -1,18 +1,22 @@
 'use client'
-import { motion } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 
-const container = {
+const container: Variants = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.08  // each tile appears 80ms after the previous
+      staggerChildren: 0.08
     }
   }
 }
 
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 300, damping: 24 }
+  }
 }
 
 export function BentoGrid({ children }: { children: React.ReactNode }) {
@@ -44,7 +48,7 @@ export function BentoTile({
       }}
       className={`relative rounded-2xl bg-[#111118] border border-[#1e1e2e]
         hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]
-        overflow-hidden transition-shadow p-5 ${className}`}
+        overflow-hidden p-5 ${className}`}
     >
       {children}
     </motion.article>
